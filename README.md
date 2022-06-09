@@ -2,7 +2,8 @@
 ###### cmd key tracker and logger created for Xserver based linux  
 ║  
 ║ binary accepts one or no arguments  
-║ if "true" is given as argument the Input.log file it creates includes all Xserver events that happened during execution  
+║ if "true" is given as argument the Input.log file  
+║           created includes all Xserver events that happened during execution  
 ║  
 ║ the official way of stopping the software is ctrl + c or just terminating it  
 ║  
