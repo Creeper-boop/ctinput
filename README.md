@@ -1,12 +1,12 @@
 # rusty_input
-###### cmd key tracker and logger created for Xserver based linux  
+###### tui key tracker and logger created for Xserver based linux  
 >  
-> binary accepts one or no arguments  
-> if "true" is given as argument the Input.log file  
-> created includes all Xserver events that happened during execution  
+> -d or --debug for debug info  
+> -l or --log for input log file or keylogger capabilities  
+> -c or --compat to disable terminal raw mode
 >  
-> the official way of stopping the software is ctrl + c or just terminating it  
+> "ctrl + c" stopps the process regardless of raw mode
 >  
-###### currently exclusively shows pressed keys for lunaro and includes coptering detection based on keyboard events
+###### the updated gui is work in progress
 
-###### will include more versatile gui management for different games and if i care enough mouse movement
+###### will include more versatile gui management for different games
