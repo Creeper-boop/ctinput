@@ -15,10 +15,11 @@ pub struct InputToolset {
 impl InputToolset {
     pub fn new(tx: Sender<[u8; 2]>, log: bool) -> InputToolset {
         // create what is effectively an Xserver logger
+        // run xinput command as subprocess to log global keys
         let child = Command::new("xinput").arg("test-xi2").arg("--root")
             .stdout(Stdio::piped()).spawn().expect("Failed to capture input!").stdout.take().unwrap();
         let reader = BufReader::new(child);
-
+        // logging file creation
         let file = File::create("Input.log").unwrap();
         let time = SystemTime::now();
 
@@ -32,33 +33,39 @@ impl InputToolset {
     }
 
     pub fn thread(&mut self) {
-        let mut o = String::new();
-        let mut k: [u8; 2] = [0, 0];
+        let mut output = String::new();
+        let mut key: [u8; 2] = [0, 0];
         let mut trim = false;
         loop {
-            let mut l = String::new();
-            self.reader.read_line(&mut l).unwrap();
-            let tmp = l.split_whitespace().find(|i| i.parse::<u8>().is_ok());
-            if l.contains("EVENT") {
-                if self.log || !trim {
-                    writeln!(self.file, "{}", o).unwrap();
-                }
-                trim = true;
-                o.clear();
-                o += &(self.time.elapsed().unwrap().as_millis().to_string() + "|" + tmp.unwrap());
-
-                k[0] = o.clone().split("|").collect::<Vec<&str>>()[1].parse::<u8>().unwrap();
-            } else if l.contains("device:") { o += tmp.unwrap(); } else {
-                if !&trim { o += &*l } else { o += l.trim() }
-                if k[0] == 13u8 || k[0] == 14u8 || k[0] == 15u8 || k[0] == 16u8 {
-                    if l.contains("detail:") {
-                        k[1] = tmp.unwrap().parse::<u8>().unwrap();
-                        self.tx.send(k).unwrap();
+            let mut line = String::new();
+            self.reader.read_line(&mut line).unwrap(); // receive line from command
+            let tmp = line.split_whitespace().find(|i| i.parse::<u8>().is_ok());
+            if line.contains("EVENT") { // meaning the next lines will tell what kind of event
+                if self.log || !trim { // write the previous line to the output file
+                    writeln!(self.file, "{}", output).unwrap();
+                } // multiple received lines are compacted into one output line
+                trim = true; // lines include redundant data
+                output.clear(); // clear last line and log event time and type
+                output += &(self.time.elapsed().unwrap().as_millis().to_string() + "|" + tmp.unwrap());
+                // key is used for thread communication its first part being the event type
+                key[0] = output.clone().split("|").collect::<Vec<&str>>()[1].parse::<u8>().unwrap();
+                // different lines require different handling the device line includes only one number
+            } else if line.contains("device:") { output += tmp.unwrap(); } else {
+                // all other lines can be handled by simple addition to file
+                if !&trim { output += &*line } else { output += line.trim() }
+                // if !trim received lines represent user input device data
+                // output to main thread required only if specific events happened
+                // 13 and 14 representing key presses and releases respectively
+                // 15 and 16 represent scroll wheel events
+                if key[0] == 13u8 || key[0] == 14u8 || key[0] == 15u8 || key[0] == 16u8 {
+                    if line.contains("detail:") { // this line includes key codes
+                        key[1] = tmp.unwrap().parse::<u8>().unwrap();
+                        self.tx.send(key).unwrap(); // being required for key showcase
                     }
                 }
             }
-            if trim { o += "|" }
-            l.clear();
+            if trim { output += "|" } // add parsing for later use of the log file
+            line.clear();
         }
     }
 }
