@@ -1,4 +1,4 @@
-/* ANSI for effect
+/* ANSI for effect TODO OLD CODE FOR REFERENCE ONLY
     "\x1b["         being the escape char
     "2J"            clear
     "y;xH"          move the cursor to x, y
