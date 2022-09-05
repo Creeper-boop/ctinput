@@ -10,6 +10,7 @@ use nix::sys::termios::Termios;
     TUI coding and explanation can be found here:
     https://poor.dev/terminal-anatomy/
  */
+
 // get dummy Termios instance
 pub fn get_dummy_attributes() -> Termios {
     // TODO somehow make dummy struct to make program usable completely without raw
@@ -49,5 +50,5 @@ pub fn get_size() -> (u16, u16) {
 pub fn load_from_file(path: &str) -> String {
     let mut file = String::new();
     BufReader::new(File::open(path).unwrap()).read_line(&mut file).expect("Invalid tui file path!");
-    file.replace(r#"\x1b["#, "\x1b[")// the first line should always represent the background
+    file.replace(r#"\x1b["#, "\x1b[")// file documentation is included in the ExampleTui
 }
