@@ -20,11 +20,14 @@ fn main() {
     let mut debug = false;
     let mut log = false;
     let mut raw = true;
+    let mut path = "../../ExampleTui"; // default path for testing
     // check for all arguments
-    env::args().for_each(|arg| match &*arg {
+    let args: Vec<String> = env::args().collect();
+    args.iter().enumerate().for_each(|(i, arg)| match arg.as_str() {
         "-d" | "--debug" => debug = true,
         "-l" | "--log" => log = true,
         "-c" | "--compat" => raw = false,
+        "-p" | "--path" => path = &args[i + 1], // todo check if this kind of loading supports any kind of exploit
         _ => {}
     });
     // initialisation for raw mode
@@ -53,14 +56,19 @@ fn main() {
     // global variable allocation
     let mut keys: Vec<u8> = Vec::new();
     let (mut width, mut height) = tui::get_size();
+    let background = tui::load_from_file(path);
     // main loop start
     // the only println that doesnt leave an empty line after being used
     println!("\x1b[H\x1b[J\x1b[?25l");
+    print!("{}", background);
     loop {
         // system signals handling
         for signal in signals.pending() {
             match signal {
-            SIGWINCH => (width, height) = tui::get_size(), // size updates
+            SIGWINCH => {
+                (width, height) = tui::get_size();
+                print!("{}", background);
+            }, // size updates
             SIGTERM | SIGINT | SIGQUIT | SIGHUP => {
                 // terminal reset and process exit
                 if raw {tui::set_mode(old_ter);}
@@ -79,13 +87,20 @@ fn main() {
             }
         }
         // debug pressed keys
-        if debug { print!("\x1b[{}H\x1b[Kw:{} h:{} {keys:?} {} {}", height - 1, width, height, key[0], key[1]); }
+        if debug { print!("\x1b[{}H\x1b[Kw:{} h:{} {:?} {} {}", height - 1, width, height, keys, key[0], key[1]); }
         // raw input handling
         if raw {
             let input = input_rx.recv_timeout(Duration::from_millis(50)).unwrap_or([0u8]);
             if debug {print!(" {:?}", input);} // debug inputted keys
-            // [3] being the ctrl + c code the usual signal is then sent
-            if input == [3] { nix::sys::signal::kill(Pid::from_raw(id() as pid_t), nix::sys::signal::SIGINT).unwrap();}
+
+            match input {
+                // [3] being the ctrl + c code the usual signal is then sent
+                [3] => { nix::sys::signal::kill(Pid::from_raw(id() as pid_t), nix::sys::signal::SIGINT).unwrap();},
+                // [12] being the ctrl + l code for clear signals for reload witch should happen when rescaled
+                [12] => { nix::sys::signal::kill(Pid::from_raw(id() as pid_t), nix::sys::signal::SIGWINCH).unwrap();},
+                // just pass if no matches
+                _ => {}
+            }
         }
 
         let _ = io::stdout().lock().flush();

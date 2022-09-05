@@ -5,8 +5,10 @@ that depends on the xinput command
 > -d or --debug for debug info  
 > -l or --log for input log file or keylogger capabilities  
 > the log file is created in the binary working directory  
-> -c or --compat to disable terminal raw mode
+> -c or --compat to disable terminal raw mode  
+> -p or --path to provide path to tui file
 > 
+> "ctrl + l" normally clearing the terminal emulator in raw mode reloads the tui  
 > "ctrl + c" stops the process regardless of raw mode
 
 the updated gui is work in progress
