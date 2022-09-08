@@ -20,7 +20,7 @@ fn main() {
     let mut debug = false;
     let mut log = false;
     let mut raw = true;
-    let mut path = "../../ExampleTui"; // default path for testing
+    let mut path = "ExampleTui";
     // check for all arguments
     let args: Vec<String> = env::args().collect();
     args.iter().enumerate().for_each(|(i, arg)| match arg.as_str() {
