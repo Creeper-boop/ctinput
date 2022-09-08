@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use libc::ioctl;
@@ -47,8 +48,23 @@ pub fn get_size() -> (u16, u16) {
     (winsize.ws_row, winsize.ws_col)
 }
 // load tui from file todo implement reactive element loading and reactive elements in general
-pub fn load_from_file(path: &str) -> String {
-    let mut file = String::new();
-    BufReader::new(File::open(path).unwrap()).read_line(&mut file).expect("Invalid tui file path!");
-    file.replace(r#"\x1b["#, "\x1b[")// file documentation is included in the ExampleTui
+pub fn load(path: &str) -> (String, HashMap<[u8; 2], String>) {
+    let mut file = BufReader::new(File::open(path).unwrap());
+    let mut static_tui = String::new();
+    let mut reactive_tui = HashMap::new();
+
+    file.read_line(&mut static_tui).expect("Invalid tui file path!");
+
+    let mut line = String::new();
+    while file.read_line(&mut line).ok().unwrap() != 0 {
+        if line.trim().is_empty() {break}
+        let (input, action) = line.split_once("]").unwrap();
+        reactive_tui.insert(
+            input.trim_start_matches("[").split(",").map(|e| e.trim().parse::<u8>().unwrap()).collect::<Vec<u8>>().try_into().unwrap(),
+            action.replace(r#"\x1b["#, "\x1b[")
+        );
+        line.clear();
+    }
+    // file documentation is included in the ExampleTui
+    (static_tui.replace(r#"\x1b["#, "\x1b["), reactive_tui)
 }

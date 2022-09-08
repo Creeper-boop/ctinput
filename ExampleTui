@@ -1,7 +1,11 @@
 \x1b[2J\x1b[38;2;255;0;255m\x1b[1;9H╔═══╗\x1b[2;9H║   ║\x1b[3;1H╔═══╦═══╬═══╝\x1b[4;1H║   ║   ║\x1b[5;1H╚═╦═╩═╦═╬═══╗\x1b[6;3H║   ║ ║   ║\x1b[7;3H╠═══╣ ╚═══╝\x1b[8;3H║   ║\x1b[9;3H╚═══╝\x1b[0m
+[13, 38]\x1b[10;10HI  AA  I
+[14, 38]\x1b[10;10HI      I
 
-the first line is loaded as background string all other lines are ignored
-the line should begin with the escape sequence for clear or "\x1b[2J"
+the first line is loaded as background string
+next line onwards until empty line or eof represents dynamic elements
+    first line should begin with the escape sequence for clear or "\x1b[2J"
+
 if colors are used the reset sequence or "\x1b[0m" should be last
 formatting can be done with ansi escape codes examples below
 
