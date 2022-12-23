@@ -1,4 +1,5 @@
 \x1b[2J\x1b[38;2;128;128;128m\x1b[1;1H╔════╗   ╔═══╦═══╦═══╗\x1b[2;1H║ LR ║   ║ W ║ E ║ R ║\x1b[3;1H╚════╝╔══╩╦══╩╦══╩╦══╝\x1b[4;7H║ A ║ S ║ D ║\x1b[5;1H╔═════╩═╦═╩═══╩═══╝\x1b[6;1H║ SHIFT ║\x1b[7;1H╠══════╦╝    ╔═══════╗\x1b[8;1H║ CTRL ║     ║ SPACE ║\x1b[9;1H╚══════╝     ╚═══════╝\x1b[0m
+==reactive==
 [15, 1]\x1b[2;2H\x1b[48;2;128;128;128m L\x1b[0m
 [16, 1]\x1b[2;2H L\x1b[0m
 [15, 3]\x1b[2;4H\x1b[48;2;128;128;128mR \x1b[0m
@@ -21,6 +22,11 @@
 [14, 50]\x1b[6;2H SHIFT \x1b[0m
 [13, 65]\x1b[8;15H\x1b[48;2;128;128;128m SPACE \x1b[0m
 [14, 65]\x1b[8;15H SPACE \x1b[0m
+==scripted==
+history 24 0 10 16
+apm 10 6 13
+==runners==
+runner [13, 24] ACTIVE:\x1b[0;7H\x1b[48;2;255;0;0m Q \x1b[0m INACTIVE:\x1b[0;7H   \x1b[0m COMMAND:sleep 5s
 
 the first line is loaded as background string
 next line onwards until empty line or eof represents dynamic elements
