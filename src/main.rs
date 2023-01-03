@@ -11,6 +11,7 @@ use nix::unistd::{Pid, Uid};
 use signal_hook::{consts::signal::*, iterator::Signals};
 
 use crate::input::InputToolset;
+use crate::runner::Lookup;
 use crate::tui::ScriptedTui;
 
 mod input;
@@ -65,7 +66,8 @@ fn main() {
     let mut debug_key = [0u8, 0u8];
     let mut debug_input = [0u8];
     let (mut height, mut width) = tui::get_size();
-    let (static_element, reactive_elements, mut scripted_elements, runners) = tui::load(path);
+    let (static_element, reactive_elements, mut scripted_elements, mut runners) = tui::load(path);
+    let mut runner_returns = if enable_runners { Option::from(Vec::new()) } else { None };
 
     // main loop start
     print!("\x1b[H\x1b[J\x1b[?25l");
@@ -98,7 +100,18 @@ fn main() {
                 ScriptedTui::Apm(apm) => if key[0] == 13u8 || key[0] == 15u8 { apm.tick() },
             });
             // runner handling
-            if enable_runners { if let Some(runner) = runners.get(key.as_ref()) { runner::run(runner) } }
+            if enable_runners {
+                let mut can_run = true;
+                runner_returns.as_mut().unwrap().retain(|e: &Lookup| {
+                    if e.key == key && !e.handle.is_finished() { can_run = false };
+                    !e.handle.is_finished()
+                });
+                if can_run {
+                    if let Some(runner) = runners.get_mut(key.as_ref()) {
+                        runner_returns.as_mut().unwrap().push(Lookup::new(key, runner.run()));
+                    }
+                }
+            }
 
             match key[0] {
                 13u8 | 15u8 => {
@@ -133,7 +146,10 @@ fn main() {
         });
 
         // debug data
-        if enable_debug { print!("\x1b[{}H\x1b[Kw:{} h:{} {:?} [g{:?} l{:?}]", height, width, height, keys, debug_key, debug_input); }
+        if enable_debug {
+            if enable_runners { print!("\x1b[{}H\x1b[K{:?}", height - 1, runner_returns.as_ref().unwrap()); }
+            print!("\x1b[{}H\x1b[Kw:{} h:{} {:?} [g{:?} l{:?}]", height, width, height, keys, debug_key, debug_input);
+        }
 
         let _ = io::stdout().lock().flush();
     }
