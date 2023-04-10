@@ -1,4 +1,4 @@
-# rusty_input
+# ctinput
 tui key tracker and logger created for X11 based linux  
 
 ### dependencies
@@ -9,8 +9,8 @@ tui key tracker and logger created for X11 based linux
 
 Download and compile with:
 
-    git clone https://github.com/Creeper-boop/rusty_input.git  
-    cd rusty_input  
+    git clone https://github.com/Creeper-boop/ctinput.git  
+    cd ctinput  
     cargo build --release
 
 to access and run the built binary with example tui:
